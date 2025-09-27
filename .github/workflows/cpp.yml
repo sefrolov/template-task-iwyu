@@ -63,6 +63,11 @@ jobs:
         run: |
           ci-extra/update-tests.sh
 
+      - name: Install iwyu for checks
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iwyu
+
       - name: Build
         run: |
           ci-extra/build.sh "$CT_CMAKE_PRESET"

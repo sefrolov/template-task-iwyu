@@ -14,18 +14,33 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ct_configure_compiler()
 include(Dependencies)
 
+find_program(IWYU_BIN NAMES include-what-you-use iwyu)
+if (IWYU_BIN)
+    if (MSVC)
+        set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_BIN};--driver-mode=cl"
+                "-Wno-unknown-warning-option"
+                "-Xiwyu;--mapping_file=${CMAKE_SOURCE_DIR}/cmake/libstdcxx.imp")
+    else ()
+        set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_BIN}"
+                "-Wno-unknown-warning-option"
+                "-Xiwyu;--mapping_file=${CMAKE_SOURCE_DIR}/cmake/libstdcxx.imp")
+    endif ()
+else ()
+    message(WARNING "include-what-you-use not found, running without it")
+endif ()
+
 # Setup a 'solution' target
 file(GLOB SOLUTION_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 list(LENGTH SOLUTION_SOURCES SOLUTION_SOURCES_LENGTH)
-if(SOLUTION_SOURCES_LENGTH EQUAL 0)
-  add_library(solution INTERFACE)
-  target_include_directories(solution INTERFACE src)
-else()
-  add_library(solution ${SOLUTION_SOURCES})
-  target_include_directories(solution PUBLIC src)
-  set_target_properties(solution PROPERTIES LINKER_LANGUAGE CXX)
-  ct_set_compiler_warnings(solution)
-endif()
+if (SOLUTION_SOURCES_LENGTH EQUAL 0)
+    add_library(solution INTERFACE)
+    target_include_directories(solution INTERFACE src)
+else ()
+    add_library(solution ${SOLUTION_SOURCES})
+    target_include_directories(solution PUBLIC src)
+    set_target_properties(solution PROPERTIES LINKER_LANGUAGE CXX)
+    ct_set_compiler_warnings(solution)
+endif ()
 
 # Setup a 'tests' target
 file(GLOB TESTS_SOURCES CONFIGURE_DEPENDS test/*.cpp)
