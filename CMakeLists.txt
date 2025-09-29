@@ -14,20 +14,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ct_configure_compiler()
 include(Dependencies)
 
-find_program(IWYU_BIN NAMES include-what-you-use iwyu)
-if (IWYU_BIN)
-    if (MSVC)
-        set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_BIN};--driver-mode=cl"
-                "-Wno-unknown-warning-option"
-                "-Xiwyu;--mapping_file=${CMAKE_SOURCE_DIR}/cmake/libstdcxx.imp")
-    else ()
-        set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_BIN}"
-                "-Wno-unknown-warning-option"
-                "-Xiwyu;--mapping_file=${CMAKE_SOURCE_DIR}/cmake/libstdcxx.imp")
-    endif ()
-else ()
-    message(WARNING "include-what-you-use not found, running without it")
-endif ()
+include(IWYU-Implementation)
+ct_setup_iwyu()
 
 # Setup a 'solution' target
 file(GLOB SOLUTION_SOURCES CONFIGURE_DEPENDS src/*.cpp)
